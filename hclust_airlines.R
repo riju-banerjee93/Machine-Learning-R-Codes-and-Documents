@@ -1,0 +1,13 @@
+attach(EastWestAirlines)
+normalized_data <- scale(EastWestAirlines[,2:ncol(EastWestAirlines)])
+d <- dist(normalized_data, method = "euclidean")
+fit <- hclust(d,method = "complete")
+plot(fit, hang = -1)
+groups <- cutree(fit,k = 5)
+rect.hclust(fit, k = 5, border = "red")
+table(groups)
+membership <- as.matrix(groups)
+my_data <- data.frame(EastWestAirlines,membership)
+my_data1 <- my_data[,c(ncol(my_data),1:ncol(my_data)-1)]
+View(my_data1)
+aggregate(EastWestAirlines[,2:ncol(EastWestAirlines)], by=list(membership), FUN=mean)
