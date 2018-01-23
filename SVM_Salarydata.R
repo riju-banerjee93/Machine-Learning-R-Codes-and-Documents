@@ -5,8 +5,8 @@ attach(salary_data)
 str(salary_data)
 salary_data$Salary <- factor(salary_data$Salary)
 str(salary_data)
-
-#dataset is imbalanced
+prop.table(table(salary_data$Salary))
+#dataset is imbalanced, so  we have to handle the imbalanced dataset
 #we have to convert character variables into factors
 
 
@@ -44,27 +44,42 @@ salary_data_test %<>%
 str(salary_data_test)
 #View(salary_data_test)
 
-  
-  
+
+
 #sampling technique for handling imbalancy
 library("ROSE")
 #salary_data_ROSE <- ROSE(Salary~., data = salary_data, seed = 3)$data
 salary_data_ROSE <- as.data.frame(ovun.sample(Salary~.,data = salary_data,method = "both", N = 45306)$data)
 
 table(salary_data_ROSE$Salary)
-
-library("e1071")
-?naiveBayes
-
-m1 <- naiveBayes(Salary~., data = salary_data_ROSE, laplace = 2)
-
-pred_m1 <- predict(m1,salary_data_test)
+library(kernlab)
+library(caret)
+m1 <- ksvm(Salary~., salary_data_ROSE,kernel = "vanilladot")
+pred_m1 <- predict(m1, salary_data_test)
 
 library(gmodels)
-CrossTable(pred_m1, salary_data_test$Salary,
-           prop.chisq = FALSE, prop.t = FALSE, prop.r = FALSE,
-           dnn = c('predicted', 'actual'))
-mean(pred_m1==salary_data_test$Salary)
-########################################################################
+CrossTable(salary_data_test$Salary, pred_m1)
+mean(salary_data_test$Salary== pred_m1)
 
+m2 <- ksvm(Salary~., salary_data_ROSE,kernel = "rbfdot")
+pred_m2 <- predict(m2, salary_data_test)
+CrossTable(salary_data_test$Salary, pred_m2)
+mean(salary_data_test$Salary== pred_m2)
 
+m3 <- ksvm(Salary~., salary_data_ROSE,kernel = "polydot")
+pred_m3 <- predict(m3, salary_data_test)
+CrossTable(salary_data_test$Salary, pred_m3)
+mean(salary_data_test$Salary== pred_m3)
+
+m4 <- ksvm(Salary~., salary_data_ROSE,kernel = "tanhdot")
+pred_m4 <- predict(m4, salary_data_test)
+CrossTable(salary_data_test$Salary, pred_m4)
+mean(salary_data_test$Salary== pred_m4)
+
+m5 <- ksvm(Salary~., salary_data_ROSE,kernel = "besseldot")
+pred_m5 <- predict(m5, salary_data_test)
+CrossTable(salary_data_test$Salary, pred_m5)
+mean(salary_data_test$Salary== pred_m5)
+
+#we made different models using the kernel trick and will use the model that has 
+#maximum accuracy
